@@ -1,0 +1,28 @@
+from app.graph.graph import process_chat
+from app.schemas.interaction import ChatMessageRequest
+from app.core.logger import logger
+
+class ChatService:
+    """Service layer for handling AI Chat interactions."""
+    
+    @staticmethod
+    def handle_chat_message(request: ChatMessageRequest) -> str:
+        """
+        Processes a chat message through the LangGraph agent.
+        
+        Args:
+            request (ChatMessageRequest): The chat message and history.
+            
+        Returns:
+            str: The AI assistant's response.
+        """
+        try:
+            # The history should include the new message
+            messages = request.history + [{"role": "user", "content": request.message}]
+            logger.info("Processing chat message through LangGraph agent.")
+            response = process_chat(messages)
+            logger.info("Successfully generated AI response.")
+            return response
+        except Exception as e:
+            logger.error(f"Failed to process chat message: {str(e)}")
+            raise Exception("Chat processing failed.")
