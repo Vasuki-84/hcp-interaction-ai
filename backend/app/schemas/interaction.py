@@ -1,6 +1,8 @@
-from pydantic import BaseModel
 from typing import Optional
 from datetime import date, time, datetime
+from pydantic import BaseModel, Field
+
+
 
 class HCPInteractionBase(BaseModel):
     hcp_name: str
@@ -41,4 +43,4 @@ class HCPInteraction(HCPInteractionBase):
 
 class ChatMessageRequest(BaseModel):
     message: str
-    history: list[dict] = [] # list of {"role": "user"|"assistant", "content": "..."}
+    history: list[dict] = Field(default_factory=list) # list of {"role": "user"|"assistant", "content": "..."}

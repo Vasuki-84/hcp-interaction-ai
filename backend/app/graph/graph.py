@@ -66,4 +66,6 @@ def process_chat(messages_data: list[dict]):
     result = agent.invoke(state)
     
     # Extract the last message content
-    return result["messages"][-1].content
+    for msg in reversed(result["messages"]):
+       if isinstance(msg, AIMessage):
+        return msg.content

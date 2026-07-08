@@ -1,0 +1,15 @@
+# Environment
+.env
+
+# Python
+__pycache__/
+*.pyc
+
+# Virtual environment
+venv/
+
+# Database
+*.db
+
+# Logs
+*.log

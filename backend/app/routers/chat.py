@@ -12,4 +12,8 @@ def chat_with_agent(request: ChatMessageRequest):
         return {"response": response}
     except Exception as e:
         logger.error(f"Error during chat interaction: {str(e)}")
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="An error occurred while processing the chat.")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An error occurred while processing the chat."
+        )
+    

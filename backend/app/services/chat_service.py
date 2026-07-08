@@ -23,6 +23,6 @@ class ChatService:
             response = process_chat(messages)
             logger.info("Successfully generated AI response.")
             return response
-        except Exception as e:
-            logger.error(f"Failed to process chat message: {str(e)}")
-            raise Exception("Chat processing failed.")
+        except Exception:
+         logger.exception("Failed to process chat message")
+         raise
