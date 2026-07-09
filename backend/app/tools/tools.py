@@ -19,14 +19,17 @@ class LogInteractionInput(BaseModel):
     outcomes: Optional[str] = Field(None, description="ALWAYS extract if a meeting result, decision, agreement, or request is mentioned. Must be distinct from follow-up actions.")
     follow_up_actions: Optional[str] = Field(None, description="ALWAYS extract if a future action, next step, or planned task is mentioned. Must be distinct from outcomes.")
 
+# TOOL 2: Updates the selected fields of an existing iteration
 class EditInteractionInput(BaseModel):
     interaction_id: int = Field(description="ID of the interaction to edit")
     field_to_update: str = Field(description="The name of the field to update (e.g., 'topics_discussed', 'sentiment')")
     new_value: str = Field(description="The new value for the field")
 
+#  TOOL 3: Retrieves the previous interation history from the database.
 class FetchInteractionsInput(BaseModel):
     hcp_name: str = Field(description="Name of the HCP to fetch history for")
 
+# TOOL 1: Extracts the structured data from the interation form
 class ExtractEntitiesInput(BaseModel):
     hcp_name: str = Field(
         default="",
@@ -80,11 +83,13 @@ class ExtractEntitiesInput(BaseModel):
         default="",
         description="Future follow-up actions."
     )
+
+# TOOL 4: Generates suggested next actions based on meeting outcomes.
 class SuggestFollowUpInput(BaseModel):
     topics_discussed: str = Field(description="Topics discussed during the interaction")
     outcomes: str = Field(description="Outcomes or agreements from the interaction")
 
-
+#  TOOL 5: Saves the interation into the database.
 @tool("log_interaction", args_schema=LogInteractionInput)
 def log_interaction(
     hcp_name: str,

@@ -11,15 +11,19 @@ class AgentState(TypedDict):
     messages: Annotated[list[BaseMessage], add_messages]
 
 # Initialize LLM
+
+# PART 1:
 llm = ChatGroq(
     model=settings.MODEL_NAME,
     api_key=settings.GROQ_API_KEY,
     temperature=0
 )
+
+# PART 2: 
 llm_with_tools = llm.bind_tools(TOOLS)
 
-print("Current Model:", settings.MODEL_NAME)
 
+#  PART 3: 
 def chatbot(state: AgentState):
     from datetime import datetime
     current_dt = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -90,8 +94,10 @@ Do not hardcode examples. Use reasoning from the conversation text.
     print("===============================\n")
     return {"messages": [response]}
 
+# PART 4:
 tool_node = ToolNode(TOOLS)
 
+#  PART 5:
 def after_tools(state: AgentState):
     # Terminate the graph immediately after extract_entities to prevent LLM errors on the second pass.
     for msg in reversed(state["messages"]):
@@ -103,6 +109,7 @@ def after_tools(state: AgentState):
             break
     return "chatbot"
 
+# PART  6:
 graph_builder = StateGraph(AgentState)
 graph_builder.add_node("chatbot", chatbot)
 graph_builder.add_node("tools", tool_node)
@@ -116,11 +123,13 @@ graph_builder.add_conditional_edges("tools", after_tools)
 
 agent = graph_builder.compile()
 
+# PART 7:
 def process_chat(messages_data: list[dict]):
     from langchain_core.messages import HumanMessage, AIMessage
     from app.core.logger import logger
     
     logger.info("--- Starting AI Interaction Processing ---")
+    
     formatted_messages = []
     for msg in messages_data:
         if msg["role"] == "user":
