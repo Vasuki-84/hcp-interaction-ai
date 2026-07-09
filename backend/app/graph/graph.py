@@ -32,7 +32,7 @@ def chatbot(state: AgentState):
 Current Date and Time: {current_dt}
 
 Your primary role is to process conversational input from the user and populate interactions for them to review.
-Always confirm with the user before actually editing an existing interaction.
+If the user explicitly requests to edit, fetch history, or suggest follow-ups, execute the corresponding tool immediately without asking for confirmation.
 Use the tools provided to:
 - extract_entities: to extract structured data from raw chat input and auto-populate the UI form for the user to review.
 - edit_interaction: to update a specific field of an existing interaction.
@@ -99,12 +99,12 @@ tool_node = ToolNode(TOOLS)
 
 #  PART 5:
 def after_tools(state: AgentState):
-    # Terminate the graph immediately after extract_entities to prevent LLM errors on the second pass.
+    # Terminate the graph immediately for tools that have user-friendly outputs
     for msg in reversed(state["messages"]):
         if isinstance(msg, AIMessage):
             if msg.tool_calls:
                 for tc in msg.tool_calls:
-                    if tc["name"] == "extract_entities":
+                    if tc["name"] in ["extract_entities", "fetch_past_interactions", "edit_interaction", "log_interaction", "suggest_follow_up"]:
                         return END
             break
     return "chatbot"
@@ -138,13 +138,37 @@ def process_chat(messages_data: list[dict]):
             formatted_messages.append(AIMessage(content=msg["content"]))
     
     state = {"messages": formatted_messages}
+    result = state
     try:
-        result = agent.invoke(state)
+        logger.info("Invoking LangGraph Agent...")
+        for s in agent.stream(state, stream_mode="values"):
+            result = s
         logger.info("LangGraph execution completed successfully.")
     except Exception as e:
         logger.error(f"LLM or Tool invocation error: {str(e)}")
+        error_msg = str(e)
+        
+        is_rate_limit = "429" in error_msg or "rate limit" in error_msg.lower() or "rate_limit_exceeded" in error_msg
+        
+        last_tool_msg = None
+        for msg in reversed(result.get("messages", [])):
+            if isinstance(msg, ToolMessage) and msg.content:
+                last_tool_msg = msg
+                break
+                
+        response_msg = "I apologize, but I encountered an error while processing the interaction data. Could you please provide the details again or rephrase?"
+        
+        if is_rate_limit:
+            if last_tool_msg:
+                response_msg = f"The requested tool executed successfully, but the AI could not generate a conversational response because the Groq daily token limit has been reached.\n\nTool Output:\n{last_tool_msg.content}"
+            else:
+                response_msg = "The AI could not generate a response because the Groq daily token limit has been reached. Please try again later."
+        else:
+            if last_tool_msg:
+                response_msg = f"The tool executed successfully, but an error occurred generating the final response.\n\nTool Output:\n{last_tool_msg.content}"
+
         return {
-            "response": "I apologize, but I encountered an error while processing the interaction data. Could you please provide the details again or rephrase?",
+            "response": response_msg,
             "extracted_data": {
                 "hcp_name": "",
                 "interaction_type": "",
@@ -237,7 +261,10 @@ def process_chat(messages_data: list[dict]):
     else:
         # Set the appropriate conversational response if no extraction tool was used
         for msg in reversed(result["messages"]):
-            if isinstance(msg, AIMessage) and msg.content:
+            if isinstance(msg, ToolMessage) and msg.content:
+                response_text = msg.content
+                break
+            elif isinstance(msg, AIMessage) and msg.content:
                 response_text = msg.content
                 break
                 

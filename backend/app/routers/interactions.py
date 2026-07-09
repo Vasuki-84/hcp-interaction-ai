@@ -10,7 +10,10 @@ router = APIRouter(prefix="/interactions", tags=["Interactions"])
 @router.post("/", response_model=HCPInteractionSchema, status_code=status.HTTP_201_CREATED)
 def create_interaction(interaction: HCPInteractionCreate, db: Session = Depends(get_db)):
     try:
-        return InteractionService.create_interaction(db, interaction)
+        logger.info("Saving interaction to database...")  
+        result = InteractionService.create_interaction(db, interaction)
+        logger.info(f"Interaction saved successfully. ID: {result.id}")
+        return result
     except Exception as e:
         logger.error(f"Error creating interaction: {str(e)}")
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Failed to create interaction.")

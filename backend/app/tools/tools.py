@@ -1,6 +1,6 @@
 from langchain_core.tools import tool
-from pydantic import BaseModel, Field
-from typing import Optional, List
+from typing import Optional, List, Union
+from pydantic import BaseModel, Field, field_validator
 from datetime import date, time
 from app.db.database import SessionLocal
 from app.models.interaction import HCPInteraction
@@ -21,9 +21,17 @@ class LogInteractionInput(BaseModel):
 
 # TOOL 2: Updates the selected fields of an existing iteration
 class EditInteractionInput(BaseModel):
-    interaction_id: int = Field(description="ID of the interaction to edit")
+    interaction_id: Union[int, str] = Field(description="ID of the interaction to edit")
     field_to_update: str = Field(description="The name of the field to update (e.g., 'topics_discussed', 'sentiment')")
     new_value: str = Field(description="The new value for the field")
+
+    @field_validator("interaction_id", mode="before")
+    @classmethod
+    def parse_interaction_id(cls, v):
+        try:
+            return int(v)
+        except (ValueError, TypeError):
+            raise ValueError(f"interaction_id must be an integer, got {v}")
 
 #  TOOL 3: Retrieves the previous interation history from the database.
 class FetchInteractionsInput(BaseModel):
@@ -210,9 +218,30 @@ def extract_entities(**kwargs) -> str:
 @tool("suggest_follow_up", args_schema=SuggestFollowUpInput)
 def suggest_follow_up(topics_discussed: str, outcomes: str) -> str:
     """Analyzes topics and outcomes to suggest follow-up actions."""
-    # The agent will use its LLM capability to generate the suggestion. This tool 
-    # provides a structured prompt instruction back to the agent.
-    return "Based on the topics and outcomes, please suggest 1-2 actionable follow-up tasks."
+    from langchain_groq import ChatGroq
+    from app.core.config import settings
+    from langchain_core.messages import HumanMessage
+    from app.core.logger import logger
+    
+    try:
+        llm = ChatGroq(
+            model=settings.MODEL_NAME,
+            api_key=settings.GROQ_API_KEY,
+            temperature=0.7
+        )
+        prompt = f"""You are an expert pharmaceutical sales strategist.
+Based on the following meeting details, suggest 1-2 specific, actionable follow-up tasks.
+
+Topics Discussed: {topics_discussed}
+Outcomes/Agreements: {outcomes}
+
+Provide the suggestions as a concise, professional list."""
+        
+        response = llm.invoke([HumanMessage(content=prompt)])
+        return response.content
+    except Exception as e:
+        logger.error(f"Error generating follow-up suggestions: {str(e)}")
+        return "I apologize, but I could not generate follow-up suggestions at this time."
 
 TOOLS = [
     log_interaction,

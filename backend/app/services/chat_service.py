@@ -20,7 +20,9 @@ class ChatService:
             # The history should include the new message
             messages = request.history + [{"role": "user", "content": request.message}]
             logger.info("Processing chat message through LangGraph agent.")
+            logger.info("Calling process_chat()...")
             response = process_chat(messages)
+            logger.info("process_chat() completed.")  
             logger.info("Successfully generated AI response.")
             return response
         except Exception:

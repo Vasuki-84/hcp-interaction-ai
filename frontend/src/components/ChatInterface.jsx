@@ -6,6 +6,7 @@ import { Bot, Send, User } from 'lucide-react';
 const ChatInterface = () => {
   const dispatch = useDispatch();
   const { history, status } = useSelector((state) => state.chat);
+  const formData = useSelector((state) => state.interaction.formData);
   const [input, setInput] = useState('');
   const messagesEndRef = useRef(null);
 
@@ -70,6 +71,50 @@ const ChatInterface = () => {
           <Send size={16} />
         </button>
       </form>
+      
+      <div className="action-buttons" style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+        <button 
+          className="btn btn-secondary" 
+          disabled={status === 'loading'}
+          style={{ fontSize: '0.8rem', padding: '0.4rem 0.8rem', border: '1px solid var(--border-color)', borderRadius: '4px', background: 'transparent', cursor: 'pointer' }}
+          type="button"
+          onClick={() => {
+             const hcpName = formData?.hcp_name || 'Dr. Wilson';
+             dispatch(sendMessage(`Show previous interactions with ${hcpName}`));
+          }}
+        >
+          Fetch History
+        </button>
+        <button 
+          className="btn btn-secondary" 
+          disabled={status === 'loading'}
+          style={{ fontSize: '0.8rem', padding: '0.4rem 0.8rem', border: '1px solid var(--border-color)', borderRadius: '4px', background: 'transparent', cursor: 'pointer' }}
+          type="button"
+          onClick={() => {
+             const hcpName = formData?.hcp_name || 'Dr. Wilson';
+             dispatch(sendMessage(`Suggest follow-up actions for ${hcpName} based on previous interactions.`));
+          }}
+        >
+          Suggest Follow-up
+        </button>
+        <button 
+          className="btn btn-secondary" 
+          disabled={status === 'loading'}
+          style={{ fontSize: '0.8rem', padding: '0.4rem 0.8rem', border: '1px solid var(--border-color)', borderRadius: '4px', background: 'transparent', cursor: 'pointer' }}
+          type="button"
+          onClick={() => {
+             const id = window.prompt("Enter Interaction ID:");
+             if (!id) return;
+             const field = window.prompt("Enter field to update (e.g., sentiment, topics_discussed):");
+             if (!field) return;
+             const val = window.prompt("Enter new value:");
+             if (!val) return;
+             dispatch(sendMessage(`Update interaction ID ${id}. Change ${field} to ${val}.`));
+          }}
+        >
+          Edit Interaction
+        </button>
+      </div>
     </div>
   );
 };
