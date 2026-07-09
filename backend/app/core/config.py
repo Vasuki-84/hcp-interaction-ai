@@ -8,7 +8,7 @@ class Settings:
     # Note: Replace user:password@host:port/dbname with actual MySQL credentials
     DATABASE_URL = os.getenv("DATABASE_URL", "mysql+mysqlconnector://root:password@localhost:3306/hcp_db")
     GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
-    MODEL_NAME = os.getenv("MODEL_NAME", "gemma2-9b-it")
+    MODEL_NAME = os.getenv("MODEL_NAME", "llama-3.3-70b-versatile")
     ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "*")
 
 settings = Settings()

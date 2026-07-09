@@ -1,22 +1,31 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { updateFormField, submitInteraction } from '../store/slices/interactionSlice';
+import { updateFormField, submitInteraction, resetForm } from '../store/slices/interactionSlice';
+import { clearChat } from '../store/slices/chatSlice';
 import { Save } from 'lucide-react';
 
 const InteractionForm = () => {
   const dispatch = useDispatch();
   const { formData, status, error } = useSelector((state) => state.interaction);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     dispatch(updateFormField({ field: name, value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    dispatch(submitInteraction(formData));
+    try {
+      await dispatch(submitInteraction(formData)).unwrap();
+      setShowSuccess(true);
+      dispatch(resetForm());
+      dispatch(clearChat());
+      setTimeout(() => setShowSuccess(false), 3000);
+    } catch (err) {
+      console.error('Failed to save interaction:', err);
+    }
   };
-
   return (
     <div className="glass-card fade-in">
       <h2 style={{ marginBottom: '1.5rem', fontSize: '1.2rem', fontWeight: '600' }}>Interaction Details</h2>
@@ -93,7 +102,7 @@ const InteractionForm = () => {
           </button>
         </div>
         
-        {status === 'succeeded' && <p style={{ color: 'green', marginTop: '1rem', textAlign: 'right' }}>Interaction saved successfully!</p>}
+        {showSuccess && <p style={{ color: 'green', marginTop: '1rem', textAlign: 'right' }}>Interaction saved successfully!</p>}
         {status === 'failed' && <p style={{ color: 'red', marginTop: '1rem', textAlign: 'right' }}>Error saving interaction.</p>}
       </form>
     </div>

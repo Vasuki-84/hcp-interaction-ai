@@ -16,8 +16,8 @@ class LogInteractionInput(BaseModel):
     materials_shared: Optional[str] = Field(None, description="Materials or samples shared")
     samples_distributed: Optional[str] = Field(None, description="Samples distributed")
     sentiment: Optional[str] = Field(None, description="Inferred sentiment (Positive, Neutral, Negative)")
-    outcomes: Optional[str] = Field(None, description="Key outcomes or agreements")
-    follow_up_actions: Optional[str] = Field(None, description="Follow up tasks")
+    outcomes: Optional[str] = Field(None, description="ALWAYS extract if a meeting result, decision, agreement, or request is mentioned. Must be distinct from follow-up actions.")
+    follow_up_actions: Optional[str] = Field(None, description="ALWAYS extract if a future action, next step, or planned task is mentioned. Must be distinct from outcomes.")
 
 class EditInteractionInput(BaseModel):
     interaction_id: int = Field(description="ID of the interaction to edit")
@@ -28,8 +28,58 @@ class FetchInteractionsInput(BaseModel):
     hcp_name: str = Field(description="Name of the HCP to fetch history for")
 
 class ExtractEntitiesInput(BaseModel):
-    text: str = Field(description="The raw conversational text to extract entities from")
+    hcp_name: str = Field(
+        default="",
+        description="Main HCP name only."
+    )
 
+    interaction_type: str = Field(
+        default="Meeting",
+        description="Meeting, Call, Email etc."
+    )
+
+    interaction_date: str = Field(
+        default="",
+        description="YYYY-MM-DD format."
+    )
+
+    interaction_time: str = Field(
+        default="",
+        description="HH:MM (24 hour). Empty if not mentioned."
+    )
+
+    attendees: str = Field(
+        default="",
+        description="Additional attendees only."
+    )
+
+    topics_discussed: str = Field(
+        default="",
+        description="Topics discussed."
+    )
+    samples_distributed: str = Field(
+        default="",
+        description="Samples distributed."
+    )
+
+    sentiment: str = Field(
+        default="Neutral",
+        description="Positive, Neutral or Negative."
+    )
+
+    materials_shared: str = Field(
+        default="",
+        description="Materials shared."
+    )
+    outcomes: str = Field(
+        default="",
+        description="Meeting outcome."
+    )
+
+    follow_up_actions: str = Field(
+        default="",
+        description="Future follow-up actions."
+    )
 class SuggestFollowUpInput(BaseModel):
     topics_discussed: str = Field(description="Topics discussed during the interaction")
     outcomes: str = Field(description="Outcomes or agreements from the interaction")
@@ -130,15 +180,27 @@ def fetch_past_interactions(hcp_name: str) -> str:
         db.close()
 
 @tool("extract_entities", args_schema=ExtractEntitiesInput)
-def extract_entities(text: str) -> str:
+def extract_entities(**kwargs) -> str:
     """
-    Extracts key fields like HCP Name, Date, Topics, etc., from raw chat input.
-    Note: Since this tool is used by the LLM itself, the LLM will often just structure data directly.
-    However, if explicitly called, it returns instructions for the LLM to process the text.
+      Extract every interaction field from the user's conversation.
+
+    ALWAYS populate:
+
+    - hcp_name
+    - interaction_type
+    - interaction_date
+    - interaction_time
+    - attendees
+    - topics_discussed
+    - materials_shared
+    - samples_distributed
+    - sentiment
+    - outcomes
+    - follow_up_actions
+
+    Return empty string only when a field truly does not exist.
     """
-    # In a full LangChain setup, this might invoke a sub-chain or extractor. 
-    # For now, it delegates the extraction back to the agent's context.
-    return "Entities should be extracted from the text. Please extract hcp_name, interaction_type, date, time, topics, and sentiment."
+    return "Entities successfully extracted and sent to the frontend. Please tell the user to review the populated form and click the 'Save Interaction' button."
 
 @tool("suggest_follow_up", args_schema=SuggestFollowUpInput)
 def suggest_follow_up(topics_discussed: str, outcomes: str) -> str:

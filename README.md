@@ -1,157 +1,355 @@
-# AI-First CRM HCP Module
+# AI-Powered HCP Interaction CRM
 
-A modern, full-stack CRM module designed for Healthcare Professionals (HCPs) featuring an AI-driven Chat Assistant powered by LangGraph, alongside a traditional structured form for logging interactions. 
+An AI-assisted Customer Relationship Management (CRM) application for Life Science Sales Representatives to efficiently capture, review, and manage Healthcare Professional (HCP) interactions.
 
-This project demonstrates a production-ready architecture with a React frontend and a FastAPI backend.
-
----
-
-## 🏗️ Project Architecture
-
-This project is built using a clean, scalable architecture separating concerns across the stack:
-
-### Frontend (React + Vite + Redux)
-- **API Layer (`src/api/`)**: Centralized Axios configuration and dedicated service files for external communications.
-- **State Management (`src/store/`)**: Redux Toolkit slices handle asynchronous API actions and application state.
-- **Component Design (`src/components/`, `src/pages/`)**: Reusable UI components separated from page-level layouts.
-
-### Backend (FastAPI + LangGraph + MySQL)
-- **Routers (`app/routers/`)**: FastAPI endpoints defined cleanly with explicit Pydantic schemas and HTTP status codes.
-- **Services (`app/services/`)**: Business logic and database transaction management are encapsulated here, keeping routers thin.
-- **AI Agent (`app/graph/`, `app/tools/`)**: The LangGraph state machine controls the conversational flow, granting the LLM safe access to structured tools.
-- **Database (`app/db/`, `app/models/`)**: SQLAlchemy models mapping to a MySQL database with a robust session management strategy.
-- **Logging (`app/core/logger.py`)**: Centralized, reusable Python logging capturing API requests, database events, and tool executions.
+The application uses **Groq Llama 3.3-70B**, **LangGraph**, and **FastAPI** to automatically extract structured information from natural language conversation notes and populate an interaction form for user review before saving.
 
 ---
 
-## 📂 Folder Structure
+## Features
+
+### AI Assistant
+
+- Extracts interaction details from natural language
+- Auto-populates the interaction form
+- Identifies HCP sentiment (Positive, Neutral, Negative)
+- Generates structured interaction data
+- Supports editing existing interactions
+- Fetches past HCP interactions
+- Suggests follow-up actions
+
+### Interaction Management
+
+- Create new HCP interactions
+- Edit existing interactions
+- Store interactions in MySQL
+- AI-assisted data entry
+- Manual review before saving
+
+### AI Entity Extraction
+
+The AI automatically extracts:
+
+- HCP Name
+- Interaction Type
+- Date
+- Time
+- Attendees
+- Topics Discussed
+- Materials Shared
+- Samples Distributed
+- Sentiment
+- Outcomes
+- Follow-up Actions
+
+---
+
+## Tech Stack
+
+### Frontend
+
+- React.js
+- Redux Toolkit
+- Axios
+- Lucide React
+- CSS
+
+### Backend
+
+- FastAPI
+- LangGraph
+- LangChain
+- Groq API
+- Llama 3.3 70B Versatile
+- SQLAlchemy
+- MySQL
+- Pydantic
+
+---
+
+## Project Structure
 
 ```
-.
-├── backend/                  # FastAPI Application
-│   ├── app/
-│   │   ├── core/             # Configuration & Logging
-│   │   ├── db/               # Database Engine Setup
-│   │   ├── graph/            # LangGraph State Machine
-│   │   ├── models/           # SQLAlchemy Models
-│   │   ├── routers/          # API Endpoints
-│   │   ├── schemas/          # Pydantic Validation Schemas
-│   │   ├── services/         # Business Logic
-│   │   └── tools/            # LangGraph Agent Tools
-│   ├── main.py               # Application Entry Point
-│   ├── requirements.txt      # Python Dependencies
-│   └── .env.example          # Environment Variables Template
-│
-├── frontend/                 # React Application
+AIVOA-FullStack-AI-Assignment/
+
+├── frontend/
 │   ├── src/
-│   │   ├── api/              # Axios Client & Services
-│   │   ├── components/       # Reusable UI Components
-│   │   ├── pages/            # Page Layouts
-│   │   ├── store/            # Redux Store & Slices
-│   │   └── styles/           # Global CSS
-│   ├── index.html
-│   ├── package.json
-│   └── .env.example          # Environment Variables Template
+│   │   ├── api/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   ├── store/
+│   │   ├── styles/
+│   │   └── App.jsx
+│   └── package.json
+│
+├── backend/
+│   ├── app/
+│   │   ├── api/
+│   │   ├── core/
+│   │   ├── db/
+│   │   ├── graph/
+│   │   ├── models/
+│   │   ├── schemas/
+│   │   ├── services/
+│   │   └── tools/
+│   ├── main.py
+│   └── requirements.txt
+│
+└── README.md
 ```
 
 ---
 
-## 🛠️ Environment Setup
+## Installation
 
-### 1. Database Setup (MySQL)
-Ensure you have MySQL installed and running locally. Create the database:
-```sql
-CREATE DATABASE hcp_db;
+### Clone Repository
+
+```bash
+git clone <repository-url>
+cd AIVOA-FullStack-AI-Assignment
 ```
 
-### 2. Backend Environment (`backend/.env`)
-Create a `.env` file inside the `backend/` directory using `.env.example` as a reference:
+---
+
+## Backend Setup
+
+Create a virtual environment
+
+```bash
+python -m venv venv
+```
+
+Activate virtual environment
+
+Windows
+
+```bash
+venv\Scripts\activate
+```
+
+Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+Run backend
+
+```bash
+uvicorn main:app --reload
+```
+
+Backend runs at
+
+```
+http://localhost:8000
+```
+
+---
+
+## Frontend Setup
+
+Navigate to frontend
+
+```bash
+cd frontend
+```
+
+Install packages
+
+```bash
+npm install
+```
+
+Run application
+
+```bash
+npm run dev
+```
+
+Frontend runs at
+
+```
+http://localhost:5173
+```
+
+---
+
+## Environment Variables
+
+Create a `.env` file inside the backend folder.
+
+Example:
+
 ```env
-PROJECT_NAME="AI-First CRM HCP Module"
-DATABASE_URL="mysql+mysqlconnector://root:password@localhost:3306/hcp_db"
-GROQ_API_KEY="your_groq_api_key_here"
-MODEL_NAME="gemma2-9b-it"
-ALLOWED_ORIGINS="http://localhost:5173"
-```
+GROQ_API_KEY=your_groq_api_key
+MODEL_NAME=llama-3.3-70b-versatile
 
-### 3. Frontend Environment (`frontend/.env`)
-Create a `.env` file inside the `frontend/` directory:
-```env
-VITE_API_BASE_URL=http://localhost:8000/api
+DB_HOST=localhost
+DB_PORT=3308
+DB_USER=root
+DB_PASSWORD=your_password
+DB_NAME=your_database
 ```
 
 ---
 
-## 🚀 Running the Application
+## AI Workflow
 
-### Running the Backend
-
-1. Navigate to the `backend/` directory:
-   ```bash
-   cd backend
-   ```
-2. Create and activate a virtual environment:
-   ```bash
-   python -m venv venv
-   source venv/Scripts/activate  # (Windows)
-   # OR source venv/bin/activate # (Mac/Linux)
-   ```
-3. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-4. Start the FastAPI server:
-   ```bash
-   uvicorn main:app --reload
-   ```
-   *The API will be available at `http://localhost:8000`*
-
-### Running the Frontend
-
-1. Navigate to the `frontend/` directory:
-   ```bash
-   cd frontend
-   ```
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Start the Vite development server:
-   ```bash
-   npm run dev
-   ```
-   *The UI will be available at `http://localhost:5173`*
+1. User describes an HCP interaction in natural language.
+2. AI processes the conversation.
+3. LangGraph invokes the `extract_entities` tool.
+4. Structured data is returned.
+5. Redux updates the interaction form.
+6. User reviews the extracted information.
+7. User clicks **Save Interaction**.
+8. FastAPI stores the interaction in MySQL.
 
 ---
 
-## 🤖 How LangGraph Works
+## Example Input
 
-The AI assistant utilizes **LangGraph** to create a structured, cyclic workflow. The agent acts as a state machine where messages flow from the user to the LLM. 
-If the LLM determines it needs to perform an action (like searching the database), it generates a `ToolMessage`. LangGraph routes the execution to the `ToolNode`, executes the appropriate Python function in `app/tools/tools.py`, and returns the result to the LLM to formulate a final response.
+```
+I met Dr. Wilson today.
 
-### The Five Tools
+We discussed Product X.
 
-1. **`log_interaction`**: Inserts a new HCP interaction record into the MySQL database.
-2. **`edit_interaction`**: Modifies a previously logged interaction. Secured by a strict whitelist of editable fields (e.g., `topics_discussed`, `outcomes`).
-3. **`search_interactions`**: Queries the database to retrieve past interactions for a specific HCP.
-4. **`extract_entities`**: Parses unstructured text to extract key entities like Medical Topics, Follow-ups, and Sentiments.
-5. **`suggest_follow_up`**: Generates intelligent follow-up actions based on the context of an interaction.
+I shared a Product X brochure and clinical trial data.
 
----
+I distributed 3 sample packs.
 
-## 🌐 API Documentation
+Dr. Wilson agreed to evaluate the product.
 
-The backend automatically generates interactive API documentation.
-Once the backend is running, navigate to:
-- **Swagger UI**: `http://localhost:8000/docs`
-- **ReDoc**: `http://localhost:8000/redoc`
-
-### Endpoints
-- `POST /api/interactions/`: Log a new interaction.
-- `GET /api/interactions/`: Fetch paginated interactions.
-- `POST /api/chat/`: Send a message to the AI LangGraph agent.
+I will send additional clinical trial data tomorrow.
+```
 
 ---
 
-## 📤 Submission Note
-This project fulfills all criteria of the AI-First CRM HCP Module assignment, featuring a complete end-to-end implementation with zero human-written code manually, purely synthesized via advanced LLM coding capabilities.
+## Example AI Extraction
+
+```
+HCP Name:
+Dr. Wilson
+
+Interaction Type:
+Meeting
+
+Date:
+2026-07-09
+
+Topics Discussed:
+Product X
+
+Materials Shared:
+Product X brochure, clinical trial data
+
+Samples Distributed:
+3 sample packs
+
+Sentiment:
+Positive
+
+Outcomes:
+Dr. Wilson agreed to evaluate the product
+
+Follow-up Actions:
+Send additional clinical trial data tomorrow
+```
+
+---
+
+## API Endpoints
+
+### AI Chat
+
+```
+POST /api/chat
+```
+
+Processes natural language interaction notes.
+
+---
+
+### Create Interaction
+
+```
+POST /api/interactions
+```
+
+Stores interaction in the database.
+
+---
+
+### Update Interaction
+
+```
+PUT /api/interactions/{id}
+```
+
+Updates an existing interaction.
+
+---
+
+### Fetch Interaction History
+
+```
+GET /api/interactions
+```
+
+Returns stored interactions.
+
+---
+
+## Dependencies
+
+Backend
+
+- FastAPI
+- Uvicorn
+- SQLAlchemy
+- mysql-connector-python
+- Pydantic
+- LangGraph
+- LangChain
+- LangChain Groq
+- Python Dotenv
+- Alembic
+
+Frontend
+
+- React
+- Redux Toolkit
+- Axios
+- Lucide React
+
+---
+
+## Future Enhancements
+
+- Authentication & Authorization
+- Dashboard Analytics
+- Advanced Search & Filtering
+- File Upload Support
+- Export Interactions
+- Email Notifications
+- Multi-user Support
+
+---
+
+## Author
+
+**Vasuki T**
+
+MERN Stack Developer
+
+GitHub:
+https://github.com/Vasuki-84
+
+LinkedIn:
+https://www.linkedin.com/in/vasuki-fullstackdeveloper
+
+---
+
+## License
+
+This project was developed as part of the **AiVOA Full Stack AI Assignment** for learning and evaluation purposes.

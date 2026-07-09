@@ -6,7 +6,7 @@ class ChatService:
     """Service layer for handling AI Chat interactions."""
     
     @staticmethod
-    def handle_chat_message(request: ChatMessageRequest) -> str:
+    def handle_chat_message(request: ChatMessageRequest) -> dict:
         """
         Processes a chat message through the LangGraph agent.
         
@@ -14,7 +14,7 @@ class ChatService:
             request (ChatMessageRequest): The chat message and history.
             
         Returns:
-            str: The AI assistant's response.
+            dict: The AI assistant's response and optionally extracted form data.
         """
         try:
             # The history should include the new message

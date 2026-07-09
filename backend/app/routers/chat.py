@@ -8,8 +8,8 @@ router = APIRouter(prefix="/chat", tags=["Chat"])
 @router.post("/", status_code=status.HTTP_200_OK)
 def chat_with_agent(request: ChatMessageRequest):
     try:
-        response = ChatService.handle_chat_message(request)
-        return {"response": response}
+        response_data = ChatService.handle_chat_message(request)
+        return response_data
     except Exception as e:
         logger.error(f"Error during chat interaction: {str(e)}")
         raise HTTPException(
