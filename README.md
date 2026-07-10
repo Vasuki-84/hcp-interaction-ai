@@ -2,38 +2,45 @@
 
 An AI-assisted Customer Relationship Management (CRM) application for Life Science Sales Representatives to efficiently capture, review, and manage Healthcare Professional (HCP) interactions.
 
-The application uses **Groq Llama 3.3-70B**, **LangGraph**, and **FastAPI** to automatically extract structured information from natural language conversation notes and populate an interaction form for user review before saving.
+The application uses **Groq Llama 3.3-70B-Versatile**, **LangGraph**, and **FastAPI** to automatically extract structured information from natural language conversation notes, populate the interaction form, allow manual review before saving, retrieve interaction history, edit existing interactions, and generate intelligent follow-up recommendations.
 
 ---
 
-## Features
+# Features
 
-### AI Assistant
+## AI Assistant
 
 - Extracts interaction details from natural language
-- Auto-populates the interaction form
+- Automatically populates the interaction form
 - Identifies HCP sentiment (Positive, Neutral, Negative)
-- Generates structured interaction data
+- Normalizes extracted dates and times
+- Prevents duplicate values between Outcomes and Follow-up Actions
+- Returns structured JSON to the frontend
 - Supports editing existing interactions
-- Fetches past HCP interactions
-- Suggests follow-up actions
+- Retrieves previous HCP interactions
+- Generates AI-powered follow-up recommendations
 
-### Interaction Management
+---
+
+## Interaction Management
 
 - Create new HCP interactions
+- Review extracted data before saving
+- Save interactions into MySQL
 - Edit existing interactions
-- Store interactions in MySQL
-- AI-assisted data entry
-- Manual review before saving
+- Retrieve previous interaction history
+- AI-assisted data entry with manual confirmation
 
-### AI Entity Extraction
+---
+
+## AI Entity Extraction
 
 The AI automatically extracts:
 
 - HCP Name
 - Interaction Type
-- Date
-- Time
+- Interaction Date
+- Interaction Time
 - Attendees
 - Topics Discussed
 - Materials Shared
@@ -44,9 +51,9 @@ The AI automatically extracts:
 
 ---
 
-## Tech Stack
+# Tech Stack
 
-### Frontend
+## Frontend
 
 - React.js
 - Redux Toolkit
@@ -54,22 +61,22 @@ The AI automatically extracts:
 - Lucide React
 - CSS
 
-### Backend
+## Backend
 
 - FastAPI
 - LangGraph
 - LangChain
 - Groq API
-- Llama 3.3 70B Versatile
+- Llama-3.3-70B-Versatile
 - SQLAlchemy
 - MySQL
 - Pydantic
 
 ---
 
-## Project Structure
+# Project Structure
 
-```
+```text
 AIVOA-FullStack-AI-Assignment/
 
 ├── frontend/
@@ -100,9 +107,9 @@ AIVOA-FullStack-AI-Assignment/
 
 ---
 
-## Installation
+# Installation
 
-### Clone Repository
+## Clone Repository
 
 ```bash
 git clone <repository-url>
@@ -111,15 +118,15 @@ cd AIVOA-FullStack-AI-Assignment
 
 ---
 
-## Backend Setup
+# Backend Setup
 
-Create a virtual environment
+### Create Virtual Environment
 
 ```bash
 python -m venv venv
 ```
 
-Activate virtual environment
+### Activate Virtual Environment
 
 Windows
 
@@ -127,19 +134,19 @@ Windows
 venv\Scripts\activate
 ```
 
-Install dependencies
+### Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-Run backend
+### Run Backend
 
 ```bash
 uvicorn main:app --reload
 ```
 
-Backend runs at
+Backend URL
 
 ```
 http://localhost:8000
@@ -147,7 +154,7 @@ http://localhost:8000
 
 ---
 
-## Frontend Setup
+# Frontend Setup
 
 Navigate to frontend
 
@@ -155,7 +162,7 @@ Navigate to frontend
 cd frontend
 ```
 
-Install packages
+Install dependencies
 
 ```bash
 npm install
@@ -167,7 +174,7 @@ Run application
 npm run dev
 ```
 
-Frontend runs at
+Frontend URL
 
 ```
 http://localhost:5173
@@ -175,11 +182,9 @@ http://localhost:5173
 
 ---
 
-## Environment Variables
+# Environment Variables
 
 Create a `.env` file inside the backend folder.
-
-Example:
 
 ```env
 GROQ_API_KEY=your_groq_api_key
@@ -194,40 +199,133 @@ DB_NAME=your_database
 
 ---
 
-## AI Workflow
+# LangGraph AI Workflow
 
-1. User describes an HCP interaction in natural language.
-2. AI processes the conversation.
-3. LangGraph invokes the `extract_entities` tool.
-4. Structured data is returned.
-5. Redux updates the interaction form.
-6. User reviews the extracted information.
-7. User clicks **Save Interaction**.
-8. FastAPI stores the interaction in MySQL.
+```text
+User Message
+      │
+      ▼
+ process_chat()
+      │
+      ▼
+ LangGraph
+      │
+      ▼
+ chatbot()
+      │
+      ▼
+ AI selects appropriate tool
+      │
+      ▼
+ ToolNode executes tool
+      │
+      ▼
+ Normalize extracted data
+      │
+      ▼
+ Return JSON response
+      │
+      ▼
+ Redux updates Interaction Form
+      │
+      ▼
+ User reviews data
+      │
+      ▼
+ Save Interaction
+      │
+      ▼
+ MySQL Database
+```
 
 ---
 
-## Example Input
+# Available AI Tools
 
-```
-I met Dr. Wilson today.
+## 1. extract_entities
+
+Extracts structured information from natural language.
+
+Fields extracted:
+
+- HCP Name
+- Interaction Type
+- Date
+- Time
+- Attendees
+- Topics Discussed
+- Materials Shared
+- Samples Distributed
+- Sentiment
+- Outcomes
+- Follow-up Actions
+
+---
+
+## 2. fetch_past_interactions
+
+Retrieves previous interactions for a Healthcare Professional from the database.
+
+---
+
+## 3. edit_interaction
+
+Updates editable fields of an existing interaction.
+
+Supports updates for:
+
+- Topics Discussed
+- Materials Shared
+- Samples Distributed
+- Sentiment
+- Outcomes
+- Follow-up Actions
+- Attendees
+
+Includes validation that converts string Interaction IDs into integers before updating the database.
+
+---
+
+## 4. suggest_follow_up
+
+Uses the Groq LLM to generate intelligent follow-up recommendations based on:
+
+- Topics Discussed
+- Meeting Outcomes
+
+Returns 1–2 professional actionable follow-up tasks.
+
+---
+
+## 5. log_interaction
+
+Stores interactions into the MySQL database.
+
+In this application, saving is performed only after the user reviews the extracted information and clicks **Save Interaction**.
+
+---
+
+# Example Input
+
+```text
+I met Dr. Wilson today at 10 AM.
 
 We discussed Product X.
 
-I shared a Product X brochure and clinical trial data.
+I shared a brochure.
 
 I distributed 3 sample packs.
 
 Dr. Wilson agreed to evaluate the product.
 
-I will send additional clinical trial data tomorrow.
+I will send the clinical trial data tomorrow.
 ```
 
 ---
 
-## Example AI Extraction
+# Example AI Extraction
 
-```
+```text
 HCP Name:
 Dr. Wilson
 
@@ -237,11 +335,14 @@ Meeting
 Date:
 2026-07-09
 
+Time:
+10:00
+
 Topics Discussed:
 Product X
 
 Materials Shared:
-Product X brochure, clinical trial data
+Brochure
 
 Samples Distributed:
 3 sample packs
@@ -250,19 +351,19 @@ Sentiment:
 Positive
 
 Outcomes:
-Dr. Wilson agreed to evaluate the product
+Agreed to evaluate the product
 
 Follow-up Actions:
-Send additional clinical trial data tomorrow
+Send clinical trial data tomorrow
 ```
 
 ---
 
-## API Endpoints
+# API Endpoints
 
-### AI Chat
+## AI Chat
 
-```
+```http
 POST /api/chat
 ```
 
@@ -270,19 +371,19 @@ Processes natural language interaction notes.
 
 ---
 
-### Create Interaction
+## Create Interaction
 
-```
+```http
 POST /api/interactions
 ```
 
-Stores interaction in the database.
+Stores interaction into MySQL.
 
 ---
 
-### Update Interaction
+## Update Interaction
 
-```
+```http
 PUT /api/interactions/{id}
 ```
 
@@ -290,24 +391,38 @@ Updates an existing interaction.
 
 ---
 
-### Fetch Interaction History
+## Retrieve Interactions
 
-```
+```http
 GET /api/interactions
 ```
 
-Returns stored interactions.
+Returns stored interaction history.
 
 ---
 
-## Dependencies
+# Backend Highlights
 
-Backend
+- LangGraph-based AI workflow
+- Automatic tool selection
+- Tool execution logging
+- Structured entity extraction
+- Response normalization
+- Date & time conversion
+- Improved error handling
+- AI tool validation
+- Manual confirmation before database save
+
+---
+
+# Dependencies
+
+## Backend
 
 - FastAPI
 - Uvicorn
 - SQLAlchemy
-- mysql-connector-python
+- MySQL Connector
 - Pydantic
 - LangGraph
 - LangChain
@@ -315,7 +430,7 @@ Backend
 - Python Dotenv
 - Alembic
 
-Frontend
+## Frontend
 
 - React
 - Redux Toolkit
@@ -324,7 +439,7 @@ Frontend
 
 ---
 
-## Future Enhancements
+# Future Enhancements
 
 - Authentication & Authorization
 - Dashboard Analytics
@@ -333,23 +448,26 @@ Frontend
 - Export Interactions
 - Email Notifications
 - Multi-user Support
+- Role-based Access Control
 
 ---
 
-## Author
+# Author
 
 **Vasuki T**
 
 MERN Stack Developer
 
-GitHub:
+GitHub
+
 https://github.com/Vasuki-84
 
-LinkedIn:
+LinkedIn
+
 https://www.linkedin.com/in/vasuki-fullstackdeveloper
 
 ---
 
-## License
+# License
 
-This project was developed as part of the **AiVOA Full Stack AI Assignment** for learning and evaluation purposes.
+Developed as part of the **AiVOA Full Stack AI Assignment** for learning and evaluation purposes.
